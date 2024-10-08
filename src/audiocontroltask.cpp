@@ -38,7 +38,6 @@ void CreateQueues(){
 }
 
 void audioTask(void *parameter) {
-    psramInit();
     CreateQueues();
     if(!audioSetQueue || !audioGetQueue){
         SerialPrintfln(ANSI_ESC_RED "Error: queues are not initialized");
@@ -227,24 +226,17 @@ void audioTask(void *parameter) {
 }
 
 TaskHandle_t Task1;
-const size_t stack_size = 8192;
-StackType_t *stack_memory;
-StaticTask_t *task_buffer;
-void audioInit() {
-    stack_memory = (StackType_t *)heap_caps_malloc(stack_size * sizeof(StackType_t), MALLOC_CAP_SPIRAM);
-    if (stack_memory == NULL) {log_e("Failed to allocate stack in PSRAM");  return;}
-    task_buffer = (StaticTask_t *)malloc(sizeof(StaticTask_t));
-    if (task_buffer == NULL) {free(stack_memory); log_e("Failed to allocate TCB"); return;}
 
-    Task1 = xTaskCreateStaticPinnedToCore(  /* Task handle. */
-        audioTask,                          /* Function to implement the task */
-        "audioplay",                        /* Name of the task */
-        stack_size,                         /* Stack size in words */
-        NULL,                               /* Task input parameter */
-        AUDIOCONTROLTASK_PRIO,              /* Priority of the task */
-        stack_memory,
-        task_buffer,
-        AUDIOCONTROLTASK_CORE               /* Core where the task should run */
+void audioInit() {
+    xTaskCreatePinnedToCore(
+        audioTask,                  /* Function to implement the task */
+        "audioplay",                /* Name of the task */
+        7500,                       /* Stack size in words */
+        NULL,                       /* Task input parameter */
+        AUDIOCONTROLTASK_PRIO,      /* Priority of the task */
+        &Task1,                     /* Task handle. */
+        AUDIOCONTROLTASK_CORE       /* Core where the task should run */
+
     );
 
     if(CORE_DEBUG_LEVEL >= 2){
@@ -255,8 +247,7 @@ void audioInit() {
 
 void audioControlTaskDelete(){
     vTaskDelete(Task1);
-    free(stack_memory);
-    free(task_buffer);
+
 }
 
 audioMessage transmitReceive(audioMessage msg){
@@ -440,3 +431,4 @@ void audioSetCoreID(uint8_t coreId){
     audioMessage RX = transmitReceive(audioTxMessage);
     (void)RX;
 }
+

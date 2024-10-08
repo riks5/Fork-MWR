@@ -4,28 +4,30 @@
 #pragma once
 #pragma GCC optimize("Os") // optimize for code size
 // clang-format off
-#define _SSID                   "mySSID"                        // Your WiFi credentials here
-#define _PW                     "myWiFiPassword"                // Or in textfile on SD-card
-#define DECODER                 1                               // (1)MAX98357A PCM5102A CS4344... (2)AC101, (3)ES8388
-#define TFT_CONTROLLER          5                               // (0)ILI9341, (1)HX8347D, (2)ILI9486a, (3)ILI9486b, (4)ILI9488, (5)ST7796, (6)ST7796RPI
-#define DISPLAY_INVERSION       0                               // (0) off (1) on
-#define TFT_ROTATION            1                               // 1 or 3 (landscape)
-#define TFT_FREQUENCY           40000000                        // 80000000, 40000000, 27000000, 20000000, 10000000
-#define TP_VERSION              5                               // (0)ILI9341, (1)ILI9341RPI, (2)HX8347D, (3)ILI9486, (4)ILI9488, (5)ST7796, (3)ST7796RPI
-#define TP_ROTATION             1                               // 1 or 3 (landscape)
-#define TP_H_MIRROR             0                               // (0) default, (1) mirror up <-> down
-#define TP_V_MIRROR             0                               // (0) default, (1) mittor left <-> right
-#define I2S_COMM_FMT            0                               // (0) MAX98357A PCM5102A CS4344, (1) LSBJ (Least Significant Bit Justified format) PT8211
-#define SDMMC_FREQUENCY         80000000                        // 80000000 or 40000000 MHz
-#define FTP_USERNAME            "esp32"                         // user and pw in FTP Client
-#define FTP_PASSWORD            "esp32"
-#define CONN_TIMEOUT            2500                            // unencrypted connection timeout in ms (http://...)
-#define CONN_TIMEOUT_SSL        3500                            // encrypted connection timeout in ms (https://...)
+//#define _SSID               ""                        // Your WiFi credentials here
+//#define _PW                 ""
+#define _SSID               ""                        // Your WiFi credentials here
+#define _PW                 ""
+#define DECODER             3                               // (0)VS1053 , (1)MAX98357A PCM5102A... (2)AC101 (3)ES8388 (4)WM8978
+#define TFT_CONTROLLER      3                              // (0)ILI9341, (1)HX8347D, (2)ILI9486a, (3)ILI9486b, (4)ILI9488
+#define DISPLAY_INVERSION   0                               // (0) off (1) on
+#define TFT_ROTATION        3                               // 1 or 3 (landscape)
+#define TFT_FREQUENCY       20000000                        // 80000000, 40000000, 27000000, 20000000, 10000000
+#define TP_VERSION          3                               // (0)ILI9341, (1)ILI9341RPI, (2)HX8347D, (3)ILI9486, (4)ILI9488, (5)ST7796, (3)ST7796RPI
+#define TP_ROTATION         3                               // 1 or 3 (landscape)
+#define TP_H_MIRROR         0                               // (0) default, (1) mirror up <-> down
+#define TP_V_MIRROR         0                               // (0) default, (1) mittor left <-> right
+#define I2S_COMM_FMT        0                               // (0) MAX98357A PCM5102A CS4344, (1) LSBJ (Least Significant Bit Justified format) PT8211
+#define SDMMC_FREQUENCY     40000000                        // 80000000 or 40000000 MHz
+#define FTP_USERNAME        "esp32"                         // user and pw in FTP Client
+#define FTP_PASSWORD        "esp32"
+#define CONN_TIMEOUT        2500                            // unencrypted connection timeout in ms (http://...)
+#define CONN_TIMEOUT_SSL    3500                            // encrypted connection timeout in ms (https://...)
 
 //——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-
+#include <vector>
 #include <Arduino.h>
-#include <ArduinoOTA.h>
+// #include <ArduinoOTA.h>
 #include <Preferences.h>
 #include <Ticker.h>
 #include <SPI.h>
@@ -37,7 +39,6 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiMulti.h>
-#include <vector>
 #include "index.h"
 #include "index.js.h"
 #include "accesspoint.h"
@@ -50,42 +51,42 @@
 #include "AC101.h"
 #include "ES8388.h"
 #include "DLNAClient.h"
-#include "KCX_BT_Emitter.h"
+//#include "KCX_BT_Emitter.h"
 #include "BH1750.h"
 #include <mbedtls/aes.h>
 #include <mbedtls/base64.h>
 
 #ifdef CONFIG_IDF_TARGET_ESP32
     // Digital I/O used
-        #define TFT_CS             22
-        #define TFT_DC             21
-        #define TFT_BL             12  // at -1 the brightness menu is not displayed
-        #define TP_IRQ             39  // VN
-        #define TP_CS               5
-        #define SD_MMC_D0           2  // cannot be changed
-        #define SD_MMC_CLK         14  // cannot be changed
-        #define SD_MMC_CMD         15  // cannot be changed
-        #define IR_PIN             35  // IR Receiver (if available)
-        #define TFT_MOSI           23  // TFT and TP (VSPI)
-        #define TFT_MISO           19  // TFT and TP (VSPI)
-        #define TFT_SCK            18  // TFT and TP (VSPI)
+        #define TFT_CS        22   //CHECK was 22
+        #define TFT_DC         5   //CHECK  was 5
+        #define TFT_BL        -1  //  at -1 the brightness menu is not displayed
+        #define TP_IRQ         0 //was 0 dit is GPIO0 !!!was 12 maar TP werkte NIET//rik nog te testen 13 hier.te verwisselen met 12 nu op tp-cs  39 en/of 36 is laatste kans
+        #define TP_CS         13  	//was 13    //rik nog te testen: 12 hier.  verwisselen met 13 nu op tp-irq
+        #define SD_MMC_D0      2  // cannot be changed 2
+        #define SD_MMC_CLK    14  // cannot be changed  14
+        #define SD_MMC_CMD    15  // cannot be changed  15
+        #define IR_PIN        -1  //rik stond op -1  was ooit 35 nu 36
+        #define TFT_MOSI      23  // TFT and TP (VSPI) 23
+        #define TFT_MISO      19  // TFT and TP (VSPI)  19
+        #define TFT_SCK       18  // TFT and TP (VSPI) 18
 
-        #define I2S_DOUT           25
-        #define I2S_BCLK           27
-        #define I2S_LRC            26
-        #define I2S_MCLK            0  // mostly not used
+        #define I2S_DOUT      26   //pin25 voor AC101, //pin 26 voor ES8388
+        #define I2S_BCLK      27  // 27
+        #define I2S_LRC       25  //pin 26 voor AC101, //pin 25 voor ES8388
+        #define I2S_MCLK       0  // mostly not used  was 0 check staat op -1 in werkende versie zonder BT
 
-        #define I2C_DAC_SDA        -1  // some DACs are controlled via I2C
-        #define I2C_DAC_SCL        -1
-        #define SD_DETECT          -1  // some pins on special boards: Lyra, Olimex, A1S ...
-        #define HP_DETECT          -1
-        #define AMP_ENABLED        -1
+        #define I2C_DAC_SDA     33  // some DACs are controlled via I2C                      //rik was -1 of 33
+        #define I2C_DAC_SCL     32                                                          //rik was -1 of 32
+        #define SD_DETECT       34  // some pins on special boards: Lyra, Olimex, A1S ...    //rik was -1 of 34
+        #define HP_DETECT       39                                                           //rik was -1 of 39
+        #define AMP_ENABLED     21                                                           //rik was -1 of 21
 
-        #define BT_EMITTER_RX      33  // TX pin - KCX Bluetooth Transmitter    (-1 if not available)
-        #define BT_EMITTER_TX      36  // RX pin - KCX Bluetooth Transmitter    (-1 if not available)
-        #define BT_EMITTER_LINK    34  // high if connected                     (-1 if not available)
-        #define BT_EMITTER_MODE    13  // high transmit - low receive           (-1 if not available)
-        #define BT_EMITTER_CONNECT 32  // -1 if not used
+        #define BT_EMITTER_RX      -1  // TX pin - KCX Bluetooth Transmitter    (-1 if not available)
+        #define BT_EMITTER_TX      -1  // RX pin - KCX Bluetooth Transmitter    (-1 if not available)
+        #define BT_EMITTER_LINK    -1  // high if connected                     (-1 if not available)
+        #define BT_EMITTER_MODE    -1  // high transmit - low receive           (-1 if not available)
+        #define BT_EMITTER_CONNECT -1  // -1 if not used
 
         #define I2C_SDA            -1  // I2C, dala line for additional HW
         #define I2C_SCL            -1  // I2C, clock line for additional HW
@@ -2288,7 +2289,7 @@ private:
     int16_t                   m_h = 0;
     int16_t                   m_oldX = 0;
     int16_t                   m_oldY = 0;
-    uint8_t*                  m_dlnaLevel;
+    uint8_t*                  m_dlnaLevel = 0;  //rik = 0 toegevoegd
     uint8_t                   m_fontSize = 0;
     uint8_t                   m_lineHight = 0;
     uint8_t                   m_browseOnRelease = 0;
@@ -3239,8 +3240,8 @@ private:
     uint8_t     m_time_ch_w = 9;
 #else // 480 x 320px
     uint16_t    m_item_x = 6;
-    uint16_t    m_item_w = 274;
-    uint16_t    m_volume_x = 280;
+    uint16_t    m_item_w = 221;              //rik was 274
+    uint16_t    m_volume_x = 227;            //rik was 280
     uint16_t    m_volume_w = 100;
     uint16_t    m_time_x = 380;
     uint16_t    m_time_w = 100;
@@ -3590,62 +3591,62 @@ private:
 //——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 inline void GetRunTimeStats( char *pcWriteBuffer ){
-    // TaskStatus_t *pxTaskStatusArray;
-    // volatile UBaseType_t uxArraySize, x;
-    // uint32_t ulTotalRunTime, ulStatsAsPercentage;
-    // char leftSpace[] = "             ";
+/*    TaskStatus_t *pxTaskStatusArray;
+    volatile UBaseType_t uxArraySize, x;
+    uint32_t ulTotalRunTime, ulStatsAsPercentage;
+    char leftSpace[] = "             ";
 
-    // // Make sure the write buffer does not contain a string.
-    // *pcWriteBuffer = 0x00;
+    // Make sure the write buffer does not contain a string.
+    *pcWriteBuffer = 0x00;
 
-    // // Take a snapshot of the number of tasks in case it changes while this function is executing.
-    // uxArraySize = uxTaskGetNumberOfTasks();
+    // Take a snapshot of the number of tasks in case it changes while this function is executing.
+    uxArraySize = uxTaskGetNumberOfTasks();
 
-    // // Allocate a TaskStatus_t structure for each task.  An array could be allocated statically at compile time.
-    // pxTaskStatusArray = (TaskStatus_t*)pvPortMalloc( uxArraySize * sizeof( TaskStatus_t ) );
+    // Allocate a TaskStatus_t structure for each task.  An array could be allocated statically at compile time.
+    pxTaskStatusArray = (TaskStatus_t*)pvPortMalloc( uxArraySize * sizeof( TaskStatus_t ) );
 
-    // if( pxTaskStatusArray != NULL ) {
-    // // Generate raw status information about each task.
-    //     uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, (UBaseType_t)uxArraySize, &ulTotalRunTime );
+    if( pxTaskStatusArray != NULL ) {
+    // Generate raw status information about each task.
+        uxArraySize = uxTaskGetSystemState( pxTaskStatusArray, (UBaseType_t)uxArraySize, &ulTotalRunTime );
 
-    //     // For percentage calculations.
-    //     ulTotalRunTime /= 100UL;
+        // For percentage calculations.
+        ulTotalRunTime /= 100UL;
 
-    //     char* tmpBuff = (char*) malloc(100);
-    //     strcpy(pcWriteBuffer, leftSpace);
-    //     strcat(pcWriteBuffer, ANSI_ESC_YELLOW "TASKNAME            | RUNTIMECOUNTER | TOTALRUNTIME[%] | CORE | PRIO  |\n");
-    //     strcat(pcWriteBuffer, leftSpace);
-    //     strcat(pcWriteBuffer,                 "--------------------+----------------+-----------------+------+-------|\n");
+        char* tmpBuff = (char*) malloc(100);
+        strcpy(pcWriteBuffer, leftSpace);
+        strcat(pcWriteBuffer, ANSI_ESC_YELLOW "TASKNAME            | RUNTIMECOUNTER | TOTALRUNTIME[%] | CORE | PRIO  |\n");
+        strcat(pcWriteBuffer, leftSpace);
+        strcat(pcWriteBuffer,                 "--------------------+----------------+-----------------+------+-------|\n");
 
-    //     // Avoid divide by zero errors.
-    //     if(ulTotalRunTime > 0){
-    //         // For each populated position in the pxTaskStatusArray array, format the raw data as human readable ASCII data
-    //         for( x = 0; x < uxArraySize; x++ ) {
-    //             // What percentage of the total run time has the task used? This will always be rounded down to the nearest integer.
-    //             // ulTotalRunTimeDiv100 has already been divided by 100.
-    //             ulStatsAsPercentage = pxTaskStatusArray[ x ].ulRunTimeCounter / ulTotalRunTime;
-    //             memset(tmpBuff, 0x20, 100);
-    //             memcpy(tmpBuff, pxTaskStatusArray[x].pcTaskName, strlen(pxTaskStatusArray[x].pcTaskName));
-    //             tmpBuff[20] = '|';
-    //             uint8_t core = (pxTaskStatusArray[x].xCoreID);
-    //             uint8_t prio = (pxTaskStatusArray[x].uxBasePriority);
-    //             if(ulStatsAsPercentage){
-    //                 sprintf(tmpBuff + 23, "%12lu  |       %02lu%%       |%4d  |%5d  |", (long unsigned int)pxTaskStatusArray[ x ].ulRunTimeCounter, (long unsigned int)ulStatsAsPercentage, core, prio);
-    //             }
-    //             else{
-    //                 sprintf(tmpBuff + 23, "%12lu  |       <1%%       |%4d  |%5d  |", (long unsigned int)pxTaskStatusArray[ x ].ulRunTimeCounter, core, prio);
-    //             }
-    //             uint8_t i = 23; while(tmpBuff[i] == '0') {tmpBuff[i] = ' '; i++;}
-    //             if(tmpBuff[45] == '0') tmpBuff[45] = ' ';
-    //             strcat(pcWriteBuffer, leftSpace);
-    //             strcat(pcWriteBuffer, tmpBuff);
-    //             strcat(pcWriteBuffer, "\n");
-    //         }
-    //         free(tmpBuff);
-    //        }
-    //     // The array is no longer needed, free the memory it consumes.
-    //     vPortFree( pxTaskStatusArray );
-    // }
+        // Avoid divide by zero errors.
+        if(ulTotalRunTime > 0){
+            // For each populated position in the pxTaskStatusArray array, format the raw data as human readable ASCII data
+            for( x = 0; x < uxArraySize; x++ ) {
+                // What percentage of the total run time has the task used? This will always be rounded down to the nearest integer.
+                // ulTotalRunTimeDiv100 has already been divided by 100.
+                ulStatsAsPercentage = pxTaskStatusArray[x].ulRunTimeCounter / ulTotalRunTime;
+                memset(tmpBuff, 0x20, 100);
+                memcpy(tmpBuff, pxTaskStatusArray[x].pcTaskName, strlen(pxTaskStatusArray[x].pcTaskName));
+                tmpBuff[20] = '|';
+                uint8_t core = (pxTaskStatusArray[x].xCoreID);
+                uint8_t prio = (pxTaskStatusArray[x].uxBasePriority);
+                if(ulStatsAsPercentage){
+                    sprintf(tmpBuff + 23, "%12lu  |       %02lu%%       |%4d  |%5d  |", (long unsigned int)pxTaskStatusArray[ x ].ulRunTimeCounter, (long unsigned int)ulStatsAsPercentage, core, prio);
+                }
+                else{
+                    sprintf(tmpBuff + 23, "%12lu  |       <1%%       |%4d  |%5d  |", (long unsigned int)pxTaskStatusArray[ x ].ulRunTimeCounter, core, prio);
+                }
+                uint8_t i = 23; while(tmpBuff[i] == '0') {tmpBuff[i] = ' '; i++;}
+                if(tmpBuff[45] == '0') tmpBuff[45] = ' ';
+                strcat(pcWriteBuffer, leftSpace);
+                strcat(pcWriteBuffer, tmpBuff);
+                strcat(pcWriteBuffer, "\n");
+            }
+            free(tmpBuff);
+           }
+        // The array is no longer needed, free the memory it consumes.
+        vPortFree( pxTaskStatusArray );
+    }*/
 }
 
 const char ir_buttons_json[] =
@@ -3675,32 +3676,8 @@ const char ir_buttons_json[] =
     "{\"19\":\"-1\",\"label\":\"-\"}]";
 
 const char stations_json[] =
-    "[[\"*\",\"D\",\"0N 70s\",\"http://0n-70s.radionetz.de:8000/0n-70s.mp3\"],"
-    "[\"*\",\"D\",\"0N 80s\",\"http://0n-80s.radionetz.de:8000/0n-80s.mp3\"],"
-    "[\"*\",\"D\",\"0N 90s\",\"http://0n-90s.radionetz.de:8000/0n-90s.mp3\"],"
-    "[\"*\",\"D\",\"0N Charts\",\"http://0n-charts.radionetz.de:8000/0n-charts.mp3\"],"
-    "[\"*\",\"D\",\"0N Dance\",\"http://0n-dance.radionetz.de:8000/0n-dance.mp3\"],"
-    "[\"*\",\"D\",\"0N Disco\",\"http://0n-disco.radionetz.de:8000/0n-disco.mp3\"],"
-    "[\"*\",\"D\",\"1000 Oldies\",\"http://c3.auracast.net:8010/stream\"],"
-    "[\"*\",\"D\",\"Eurodance\",\"http://www.laut.fm/eurodance\"],"
-    "[\"\",\"D\",\"extra-radio 88.0\",\"https://www.extra-radio.de/stream/listen.m3u\"],"
-    "[\"*\",\"D\",\"Hitradio SKW\",\"http://server4.streamserver24.com:2199/tunein/hitradio.asx\"],"
-    "[\"*\",\"D\",\"MacSlon's Irish Pub Radio\",\"http://macslons-irish-pub-radio.stream.laut.fm/macslons-irish-pub-radio\"],"
-    "[\"\",\"GR\",\"Άνοιξη 100.7\",\"http://solid1.streamupsolutions.com:55023/stream\"],"
-    "[\"\",\"RU\",\"НАШЕ Радио\",\"http://nashe1.hostingradio.ru/nashe-128.mp3\"],"
-    "[\"\",\"RU\",\"Радио Русские Песни\",\"http://listen.rusongs.ru/ru-mp3-128\"],"
-    "[\"\",\"BG\",\"Свежа България\",\"http://31.13.223.148:8000/fresh.mp3\"],"
-    "[\"\",\"CH\",\"SWISS POP\",\"https://stream.srg-ssr.ch/rsp/aacp_48.asx\"],"
-    "[\"\",\"BG\",\"BGRADIO\",\"http://play.global.audio/bgradio_low.ogg\"],"
-    "[\"\",\"D\",\"knixx.fm\",\"http://s1.knixx.fm:5347/dein_webradio_vbr.opus\"],"
-    "[\"*\",\"D\",\"- 0 N - Christmas on Radio\",\"https://0n-christmas.radionetz.de/0n-christmas.aac\"],"
-    "[\"*\",\"UK\",\"BBC 6music\",\"http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio=96000.norewind.m3u8\"],"
-    "[\"\",\"D\",\"- 0 N - Movies on Radio\",\"https://0n-movies.radionetz.de/0n-movies.mp3\"],"
-    "[\"*\",\"D\",\"- 0 N - Top 40 on Radio\",\"https://0n-top40.radionetz.de/0n-top40.mp3\"],"
-    "[\"\",\"D\",\"ROCKANTENNE Alternative (mp3)\",\"https://stream.rockantenne.de/alternative/stream/mp3\"],"
-    "[\"\",\"P\",\"Gra Wrocław\",\"http://rmfstream2.interia.pl:8000/radio_gra_wroc\"],"
-    "[\"*\",\"RU\",\"Classic EuroDisco Радио\",\"https://live.radiospinner.com/clsscrdsc-96\"],"
-    "[\"*\",\"D\",\"Hit Radio FFH - Soundtrack (AAC+)\",\"http://streams.ffh.de/ffhchannels/aac/soundtrack.m3u\"]]";
+    "[[\"*\",\"BE\",\"Radio 1\",\"http://icecast-servers.vrtcdn.be/radio1.aac\"],"
+    "[\"*\",\"BE\",\"RG\",\"https://streaming.exclusive.radio/er/rorygallagher/icecast.audio\"]]";
 
 const char aesKey [] = "mysecretkey12345";
 
