@@ -4,7 +4,7 @@
     MiniWebRadio -- Webradio receiver for ESP32
 
     first release on 03/2017                                                                                                      */String Version ="\
-    Version 3.5c - Oct 09/2024                                                                                                                       ";
+    Version 3.5d - Oct 09/2024                                                                                                                       ";
 
 /*  2.8" color display (320x240px) with controller ILI9341 or HX8347D (SPI) or
     3.5" color display (480x320px) with controller ILI9486 or ILI9488 (SPI)
@@ -1291,12 +1291,12 @@ void connecttohost(const char* host) {
         }
     }
 }
-void connecttoFS(const char* filename, uint32_t resumeFilePos) {
+void connecttoFS(const char* FS, const char* filename, uint32_t resumeFilePos) {
     dispFooter.updateBitRate(0);
     _icyBitRate = 0;
     _decoderBitRate = 0;
     _cur_Codec = 0;
-    _f_isFSConnected = audioConnecttoFS(filename, resumeFilePos);
+    _f_isFSConnected = audioConnecttoFS(FS, filename, resumeFilePos);
     _f_isWebConnected = false;
     //    log_w("Filesize %d", audioGetFileSize());
     //    log_w("FilePos %d", audioGetFilePosition());
@@ -1797,7 +1797,7 @@ void SD_playFile(const char* path, uint32_t resumeFilePos, bool showFN) {
     }
 
     SerialPrintfln("AUDIO_FILE:  " ANSI_ESC_MAGENTA "%s", path + idx + 1);
-    connecttoFS((const char*)path, resumeFilePos);
+    connecttoFS("SD_MMC", (const char*)path, resumeFilePos);
     if(_f_playlistEnabled) showPlsFileNumber();
     if(_f_isFSConnected) {
         free(_lastconnectedfile);
@@ -2496,7 +2496,7 @@ void loop() {
                 setVolume(_ringVolume);
                 audioSetVolume(_ringVolume, _volumeCurve);
                 muteChanged(false);
-                connecttoFS("/ring/alarm_clock.mp3");
+                connecttoFS("SD_MMC", "/ring/alarm_clock.mp3");
             }
             else{ // alarm without bell
                 _f_eof_alarm = true;
@@ -2545,7 +2545,7 @@ void loop() {
                 _f_eof = false;
                 if(_timeFormat == 12) {if(hour > 12) hour -= 12;}
                 sprintf(_chbuf, "/voice_time/%d_00.mp3", hour);
-                SerialPrintfln("Time: ...... play Audiofile %s", _chbuf) connecttoFS(_chbuf);
+                SerialPrintfln("Time: ...... play Audiofile %s", _chbuf) connecttoFS("SD_MMC", _chbuf);
                 return;
             }
             else { SerialPrintfln("Time: ...... Announcement at %d o'clock is silent", hour); }
@@ -2765,6 +2765,10 @@ endbrightness:
         if(r.startsWith("ais")){ // openAIspeech
             log_w("openAI speech");
             audioOpenAIspeech("openAI_key", "Today is a wonderful day to build something people love!");
+        }
+        if(r.startsWith("ctfs")){ // connecttoFS
+            log_w("SPIFFS");
+            connecttoFS("SPIFFS", "/Collide.ogg");
         }
     }
 }
