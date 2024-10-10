@@ -319,11 +319,6 @@ struct w_h  {uint16_t x =   0; uint16_t y =   0; uint16_t w = 480; uint16_t h = 
 struct w_l  {uint16_t x =   0; uint16_t y =  30; uint16_t w = 130; uint16_t h = 128;} const _winLogo;  //rik 128 was 132
 struct w_n  {uint16_t x = 132; uint16_t y =  30; uint16_t w = 348; uint16_t h = 128;} const _winName;  //rik 128 was 132
 struct w_e  {uint16_t x =   0; uint16_t y =  30; uint16_t w = 480; uint16_t h = 128;} const _winFName;  //rik 128 was 132
-struct w_j  {uint16_t x =   0; uint16_t y = 158; uint16_t w = 130; uint16_t h =  40 ;} const _winFileNr;  
-struct w_a  {uint16_t x =   0; uint16_t y = 219; uint16_t w = 480; uint16_t h =   9;} const _winProgbar;
-struct w_l  {uint16_t x =   0; uint16_t y =  30; uint16_t w = 130; uint16_t h = 132;} const _winLogo;
-struct w_n  {uint16_t x = 132; uint16_t y =  30; uint16_t w = 348; uint16_t h = 132;} const _winName;
-struct w_e  {uint16_t x =   0; uint16_t y =  30; uint16_t w = 480; uint16_t h = 132;} const _winFName;
 struct w_j  {uint16_t x =   0; uint16_t y = 164; uint16_t w = 130; uint16_t h =  40;} const _winFileNr;
 struct w_a  {uint16_t x =   0; uint16_t y = 210; uint16_t w = 480; uint16_t h =  14;} const _winProgbar;  // progressbar
 struct w_t  {uint16_t x =   0; uint16_t y = 162; uint16_t w = 480; uint16_t h = 128;} const _winTitle;

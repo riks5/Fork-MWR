@@ -38,6 +38,7 @@ void CreateQueues(){
 }
 
 void audioTask(void *parameter) {
+    psramInit();
     CreateQueues();
     if(!audioSetQueue || !audioGetQueue){
         SerialPrintfln(ANSI_ESC_RED "Error: queues are not initialized");
@@ -77,7 +78,15 @@ void audioTask(void *parameter) {
             }
             else if(audioRxTaskMessage.cmd == CONNECTTOFS){
                 audioTxTaskMessage.cmd = CONNECTTOFS;
-                audioTxTaskMessage.ret = audio.connecttoFS(SD_MMC, audioRxTaskMessage.txt1, audioRxTaskMessage.value1);
+                if(strcmp(audioRxTaskMessage.txt2, "SPIFFS")== 0){
+                    audioTxTaskMessage.ret = audio.connecttoFS(SPIFFS, audioRxTaskMessage.txt1, audioRxTaskMessage.value1);
+                }
+                if(strcmp(audioRxTaskMessage.txt2, "SD_MMC")== 0){
+                    audioTxTaskMessage.ret = audio.connecttoFS(SD_MMC, audioRxTaskMessage.txt1, audioRxTaskMessage.value1);
+                }
+                if(strcmp(audioRxTaskMessage.txt2, "FFat")== 0){
+                    audioTxTaskMessage.ret = audio.connecttoFS(FFat, audioRxTaskMessage.txt1, audioRxTaskMessage.value1);
+                }
                 xQueueSend(audioGetQueue, &audioTxTaskMessage, portMAX_DELAY);
             }
             else if(audioRxTaskMessage.cmd == CONNECTTOSPEECH){
@@ -236,9 +245,7 @@ void audioInit() {
         AUDIOCONTROLTASK_PRIO,      /* Priority of the task */
         &Task1,                     /* Task handle. */
         AUDIOCONTROLTASK_CORE       /* Core where the task should run */
-
     );
-
     if(CORE_DEBUG_LEVEL >= 2){
         {SerialPrintfln("audiotask:   is pinned to core " ANSI_ESC_CYAN "%d", AUDIOCONTROLTASK_CORE);}
         {SerialPrintfln("audiotask:   priority is " ANSI_ESC_CYAN "%d", AUDIOCONTROLTASK_PRIO);}
@@ -247,7 +254,8 @@ void audioInit() {
 
 void audioControlTaskDelete(){
     vTaskDelete(Task1);
-
+//    free(stack_memory);
+//    free(task_buffer);
 }
 
 audioMessage transmitReceive(audioMessage msg){
@@ -303,9 +311,10 @@ boolean audioConnecttohost(const char* host, const char* user, const char* pwd){
     return RX.ret;
 }
 
-boolean audioConnecttoFS(const char* filename, uint32_t resumeFilePos){
+boolean audioConnecttoFS(const char* FS, const char* filename, uint32_t resumeFilePos){
     audioTxMessage.cmd = CONNECTTOFS;
     audioTxMessage.txt1 = filename;
+    audioTxMessage.txt2 = FS;
     audioTxMessage.value1 = resumeFilePos;
     audioMessage RX = transmitReceive(audioTxMessage);
     return RX.ret;
@@ -431,4 +440,3 @@ void audioSetCoreID(uint8_t coreId){
     audioMessage RX = transmitReceive(audioTxMessage);
     (void)RX;
 }
-
