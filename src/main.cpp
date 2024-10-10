@@ -1661,6 +1661,7 @@ void setStation(uint16_t sta) {
         _f_newStreamTitle = true;
     }
     else {
+        if(_state != RADIO) changeState(RADIO);
         _streamTitle[0] = '\0';
         _icyDescription[0] = '\0';
         _f_newStreamTitle = true;
@@ -2184,7 +2185,7 @@ void changeState(int32_t state){
                             txt_RA_sTitle.disable();    txt_RA_staName.disable();  txt_RA_irNum.disable();    VUmeter_RA.disable(); break;
         case STATIONSLIST:  lst_RADIO.disable();
                             break;
-        case PLAYER:        btn_PL_Mute.disable();      btn_PL_pause.disable();    btn_PL_cancel.disable();    btn_PL_off.disable();
+        case PLAYER:        btn_PL_Mute.disable();      btn_PL_pause.disable();    btn_PL_cancel.disable();   btn_PL_off.disable();
                             btn_PL_prevFile.disable();  btn_PL_nextFile.disable(); btn_PL_ready.disable();    btn_PL_playAll.disable(); btn_PL_shuffle.disable();
                             btn_PL_fileList.hide();     btn_PL_radio.hide();       txt_PL_fName.disable();    pgb_PL_progress.disable();
                             sdr_PL_volume.hide();       pic_PL_logo.disable();
